@@ -28,6 +28,16 @@ const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 
+
+const isValid = (value) => {
+    if (typeof value === "undefined" || value === null) return false
+    if (typeof value === "string" && value.trim().length === 0) false
+    else {
+        return true
+    }
+}
+
+
 //====================================================== < Shorten Url > ======================================================
 
 const createShortUrl = async function (req, res) {
@@ -42,7 +52,7 @@ const createShortUrl = async function (req, res) {
 
         const longUrl = req.body.longUrl
 
-        if (!longUrl) {
+        if (!isValid(longUrl)) {
             return res.status(400).send({ status: false, message: "Long Url is required" })
         }
 
@@ -94,7 +104,7 @@ const getUrl = async function (req, res) {
     try {
         let urlCode = req.params.urlCode
 
-        if (!urlCode) {
+        if (!isValid(urlCode)) {
             return res.status(400).send({ status: false, message: "Urlcode is not present" })
         }
 
