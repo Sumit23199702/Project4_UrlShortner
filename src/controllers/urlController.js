@@ -78,7 +78,7 @@ const createShortUrl = async function (req, res) {
         let dbCallUrl = await urlModel.findOne({ longUrl })
         if (dbCallUrl) {
             await SET_ASYNC(`${longUrl}`, JSON.stringify(dbCallUrl))
-            return res.status(200).send({ status: false, message: "data from db", data: dbCallUrl })
+            return res.status(200).send({ status: true, message: "data from db", data: dbCallUrl })
         }
 
         let urlBody = {
@@ -97,7 +97,7 @@ const createShortUrl = async function (req, res) {
         return res.status(201).send({ status: true, data: urlDetails })
 
     } catch (error) {
-        return res.status(500).send({ status: true, message: "error.message" })
+        return res.status(500).send({ status: false, message: "error.message" })
     }
 }
 
