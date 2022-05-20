@@ -28,7 +28,7 @@ const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
 
-
+// Validation Starts here...
 const isValid = (value) => {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value === "string" && value.trim().length === 0) false
@@ -38,11 +38,15 @@ const isValid = (value) => {
 }
 
 
-//====================================================== < Shorten Url > ======================================================
+//======================================= < Shorten Url > ===========================================
 
 const createShortUrl = async function (req, res) {
     try {
+
         const baseUrl = 'http://localhost:3000';
+        if (!(/^https?:\/\/\w/).test(baseUrl)) {
+            return res.status(400).send({ status: false, msg: "Please check your Base Url, Provide a valid One." })
+        }
 
         const requestBody = req.body
 
@@ -98,7 +102,7 @@ const createShortUrl = async function (req, res) {
 }
 
 
-//====================================================< Redirect to the original URL >================================================
+//=====================< Redirect to the original URL >====================================
 
 const getUrl = async function (req, res) {
     try {
