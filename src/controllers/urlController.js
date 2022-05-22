@@ -104,29 +104,37 @@ const createShortUrl = async function (req, res) {
 
 //=====================< Redirect to the original URL >====================================
 
-const getUrl = async function (req, res) {
+const getUrl = async function (req, res)  {
     try {
-        let urlCode = req.params.urlCode
+        const urlCode = req.params.urlCode.trim();
+        //
+        let cahcedUrlCode = await GET_ASYNC(`${urlCode}`)
 
-        if (!isValid(urlCode)) {
-            return res.status(400).send({ status: false, message: "Urlcode is not present" })
+        if (cahcedUrlCode) {
+
+            return res.status(200).redirect(JSON.parse(cahcedUrlCode))
+
         }
 
-        //checking url in cache server memory
-        const isUrlCached = await GET_ASYNC(`${urlCode}`)
-        if (isUrlCached) return res.status(302).redirect(JSON.parse(isUrlCached).longUrl)
-
-        //saving Url in cache server memory
-        const isAlreadyUrlInDb = await urlModel.findOne({ urlCode: urlCode })
-        if (!isAlreadyUrlInDb) return res.status(404).send({ status: false, message: "Unable to find URL to redirect to....." })
-
-        await SET_ASYNC(`${urlCode}`, JSON.stringify(isAlreadyUrlInDb))
-        return res.status(302).redirect(isAlreadyUrlInDb.longUrl);
+        else {
+            const url = await urlModel.findOne({
+                urlCode: urlCode
+            }).select({ longUrl: 1, urlCode: 1, shortUrl: 1, _id: 0 });
+            if (!url) {
+                return res.status(404).send({ status: false, message: "No URL found" })
+            }
+            else {
+                let seturl=url.longUrl
+                await SET_ASYNC(`${seturl}`, JSON.stringify(url))
+                return res.status(302).redirect(seturl)
+            }
+        }
     }
-    catch (err) {
-        return res.status(500).send({ status: false, error: err.message })
+
+    catch (error) {
+        return res.status(500).send({ status: false, Message: error.message });
     }
-}
+};
 
 
 
